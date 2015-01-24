@@ -796,6 +796,127 @@ public class XmlCombinerTest {
 		assertXMLIdentical(new Diff(result, actual), true);
 	}
 
+	@Test
+	public void shouldCombineXliff() throws IOException, SAXException, ParserConfigurationException,
+			TransformerException {
+		String recessive = "\n"
+				+ "<xliff>\n"
+				+ "    <header>foo</header>\n"
+				+ "    <header>bar</header>\n"
+				+ "    <file id='1'>\n"
+				+ "         <trans-unit id='2'>1</trans-unit>\n"
+				+ "         <trans-unit id='2'>2</trans-unit>\n"
+				+ "         <trans-unit>3</trans-unit>\n"
+				+ "    </file>\n"
+				+ "    <file id='2'>\n"
+				+ "    </file>\n"
+				+ "</xliff>";
+		String dominant = "\n"
+				+ "<xliff>\n"
+				+ "    <header>foo</header>\n"
+				+ "    <header>bar</header>\n"
+				+ "    <file id='1'>\n"
+				+ "         <trans-unit id='2'>4</trans-unit>\n"
+				+ "    </file>\n"
+				+ "    <file id='2'>\n"
+				+ "         <trans-unit>5</trans-unit>\n"
+				+ "         <trans-unit id='3'>6</trans-unit>\n"
+				+ "    </file>\n"
+				+ "</xliff>";
+		String result = "\n"
+				+ "<xliff>\n"
+				+ "    <header>foo</header>\n"
+				+ "    <header>bar</header>\n"
+				+ "    <file id='1'>\n"
+				+ "         <trans-unit id='2'>1</trans-unit>\n"
+				+ "         <trans-unit id='2'>2</trans-unit>\n"
+				+ "         <trans-unit>3</trans-unit>\n"
+				+ "         <trans-unit id='2'>4</trans-unit>\n"
+				+ "    </file>\n"
+				+ "    <file id='2'>\n"
+				+ "         <trans-unit>5</trans-unit>\n"
+				+ "         <trans-unit id='3'>6</trans-unit>\n"
+				+ "    </file>\n"
+				+ "</xliff>";
+
+		ChildContextsMapper mapper = new XliffChildContextsMapper();
+		String actual = combineWithMapper(mapper, recessive, dominant);
+		//System.out.println(actual);
+		assertXMLIdentical(new Diff(result, actual), true);
+	}
+
+	@Test
+	public void shouldCombineMultipartXliff() throws IOException, SAXException, ParserConfigurationException,
+			TransformerException {
+		String part0 = "\n"
+				+ "<xliff>\n"
+				+ "    <header>foo</header>\n"
+				+ "    <header>bar</header>\n"
+				+ "    <file id='1'><body>\n"
+				+ "         <trans-unit id='2'>1</trans-unit>\n"
+				+ "         <trans-unit>2</trans-unit>\n"
+				+ "         <trans-unit>3</trans-unit>\n"
+				+ "    </body></file>\n"
+				+ "    <file id='2'><body>\n"
+				+ "    </body></file>\n"
+				+ "</xliff>";
+		String part1 = "\n"
+				+ "<xliff>\n"
+				+ "    <header>foo</header>\n"
+				+ "    <header>bar</header>\n"
+				+ "    <file id='1'><body>\n"
+				+ "         <trans-unit id='2'>4</trans-unit>\n"
+				+ "    </body></file>\n"
+				+ "    <file id='2'><body>\n"
+				+ "         <trans-unit>5</trans-unit>\n"
+				+ "         <trans-unit id='3'>6</trans-unit>\n"
+				+ "    </body></file>\n"
+				+ "</xliff>";
+		String part2 = "\n"
+				+ "<xliff>\n"
+				+ "    <header>foo</header>\n"
+				+ "    <header>bar</header>\n"
+				+ "    <file id='1'><body>\n"
+				+ "         <trans-unit id='2'>2</trans-unit>\n"
+				+ "    </body></file>\n"
+				+ "    <file id='2'><body>\n"
+				+ "         <trans-unit>7</trans-unit>\n"
+				+ "         <trans-unit id='3'>8</trans-unit>\n"
+				+ "         <trans-unit>9</trans-unit>\n"
+				+ "         <trans-unit id='3'>10</trans-unit>\n"
+				+ "         <trans-unit>11</trans-unit>\n"
+				+ "         <trans-unit id='2'>12</trans-unit>\n"
+				+ "    </body></file>\n"
+				+ "</xliff>";
+		String result = "\n"
+				+ "<xliff>\n"
+				+ "    <header>foo</header>\n"
+				+ "    <header>bar</header>\n"
+				+ "    <file id='1'><body>\n"
+				+ "         <trans-unit id='2'>1</trans-unit>\n"
+				+ "         <trans-unit>2</trans-unit>\n"
+				+ "         <trans-unit>3</trans-unit>\n"
+				+ "         <trans-unit id='2'>4</trans-unit>\n"
+				+ "         <trans-unit id='2'>2</trans-unit>\n"
+				+ "    </body></file>\n"
+				+ "    <file id='2'><body>\n"
+				+ "         <trans-unit>5</trans-unit>\n"
+				+ "         <trans-unit id='3'>6</trans-unit>\n"
+				+ "         <trans-unit>7</trans-unit>\n"
+				+ "         <trans-unit id='3'>8</trans-unit>\n"
+				+ "         <trans-unit>9</trans-unit>\n"
+				+ "         <trans-unit id='3'>10</trans-unit>\n"
+				+ "         <trans-unit>11</trans-unit>\n"
+				+ "         <trans-unit id='2'>12</trans-unit>\n"
+				+ "    </body></file>\n"
+				+ "</xliff>";
+
+		ChildContextsMapper mapper = new XliffChildContextsMapper();
+		String actual = combineWithMapper(mapper, part0, part1, part2);
+		//System.out.println(actual);
+		assertXMLIdentical(new Diff(result, actual), true);
+	}
+
 
 	@Test
 	public void shouldSupportReadingAndStoringFiles() throws IOException, ParserConfigurationException, SAXException,
