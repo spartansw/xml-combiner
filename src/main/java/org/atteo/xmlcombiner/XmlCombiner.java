@@ -94,9 +94,9 @@ public class XmlCombiner {
 		}
 	};
 	private Filter filter = NULL_FILTER;
-	private final ChildContextsMapper childContextMapper = new KeyAttributesChildContextsMapper();
+	private ChildContextsMapper childContextMapper = new KeyAttributesChildContextsMapper();
 
-	public static void main(String[] args) throws ParserConfigurationException, SAXException, IOException,
+    public static void main(String[] args) throws ParserConfigurationException, SAXException, IOException,
 			TransformerException {
 		List<Path> files = new ArrayList<>();
 		List<String> ids = new ArrayList<>();
@@ -175,6 +175,10 @@ public class XmlCombiner {
 			return;
 		}
 		this.filter = filter;
+	}
+
+    public void setChildContextMapper(ChildContextsMapper childContextMapper) {
+	    this.childContextMapper = childContextMapper;
 	}
 
 	/**

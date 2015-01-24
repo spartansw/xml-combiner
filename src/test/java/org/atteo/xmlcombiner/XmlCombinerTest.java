@@ -32,9 +32,12 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 import org.custommonkey.xmlunit.Diff;
+
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLIdentical;
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLNotEqual;
+
 import org.junit.Test;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -675,6 +678,46 @@ public class XmlCombinerTest {
 				dominant)), true);
 	}
 
+	@Test
+	public void shouldAllowToUseAllAttributesAsKeys() throws IOException, SAXException, ParserConfigurationException,
+			TransformerException {
+		String recessive = "\n"
+				+ "<config>\n"
+				+ "    <service name='a'><one/></service>\n"
+				+ "    <service name='b'><one/></service>\n"
+				+ "    <service name='c'><one/></service>\n"
+				+ "    <service name='c'><one/></service>\n"
+				+ "    <service name='d'><one/></service>\n"
+				+ "    <service name='e'><one/></service>\n"
+				+ "</config>";
+		String dominant = "\n"
+				+ "<config>\n"
+				+ "    <service name='b'><two/></service>\n"
+				+ "    <service name='a'><two/></service>\n"
+				+ "    <service name='c'><two/></service>\n"
+				+ "    <service name='d'><two/></service>\n"
+				+ "    <service name='d'><two/></service>\n"
+				+ "    <service name='f'><two/></service>\n"
+				+ "</config>";
+		String result = "\n"
+				+ "<config>\n"
+                + "    <service name='a'><one/><two/></service>\n"
+                + "    <service name='b'><one/><two/></service>\n"
+				+ "    <service name='c'><one/></service>\n"
+				+ "    <service name='c'><one/></service>\n"
+				+ "    <service name='d'><one/></service>\n"
+				+ "    <service name='e'><one/></service>\n"
+				+ "    <service name='c'><two/></service>\n"
+				+ "    <service name='d'><two/></service>\n"
+				+ "    <service name='d'><two/></service>\n"
+				+ "    <service name='f'><two/></service>\n"
+				+ "</config>";
+
+		final String actual = combineWithMapper(new AllAttributesChildContextsMapper(), recessive, dominant);
+		//System.out.println(actual);
+		assertXMLIdentical(new Diff(result, actual), true);
+	}
+
 
 	@Test
 	public void shouldSupportReadingAndStoringFiles() throws IOException, ParserConfigurationException, SAXException,
@@ -705,6 +748,26 @@ public class XmlCombinerTest {
 			ParserConfigurationException, SAXException, TransformerConfigurationException,
 			TransformerException {
 		return combineWithKeys(Lists.newArrayList(keyAttributeName), inputs);
+	}
+
+	private static String combineWithMapper(ChildContextsMapper mapper, String... inputs) throws IOException,
+			ParserConfigurationException, SAXException, TransformerConfigurationException,
+			TransformerException {
+		XmlCombiner combiner = new XmlCombiner();
+		combiner.setChildContextMapper(mapper);
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder builder = factory.newDocumentBuilder();
+
+		for (String input : inputs) {
+			Document document = builder.parse(new ByteArrayInputStream(input.getBytes("UTF-8")));
+			combiner.combine(document);
+		}
+		Document result = combiner.buildDocument();
+
+		Transformer transformer = TransformerFactory.newInstance().newTransformer();
+		StringWriter writer = new StringWriter();
+		transformer.transform(new DOMSource(result), new StreamResult(writer));
+		return writer.toString();
 	}
 
 	private static String combineWithKeys(List<String> keyAttributeNames, String... inputs) throws IOException,
