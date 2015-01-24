@@ -44,6 +44,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
@@ -713,7 +714,51 @@ public class XmlCombinerTest {
 				+ "    <service name='f'><two/></service>\n"
 				+ "</config>";
 
-		final String actual = combineWithMapper(new AllAttributesChildContextsMapper(), recessive, dominant);
+		ChildContextsMapper mapper = new GeneratorBasedChildContextsMapper(new AllAttributesKeysGenerator());
+		final String actual = combineWithMapper(mapper, recessive, dominant);
+		//System.out.println(actual);
+		assertXMLIdentical(new Diff(result, actual), true);
+	}
+
+	@Test
+	public void shouldAllowOnlyCombineIdAsKeys() throws IOException, SAXException, ParserConfigurationException,
+			TransformerException {
+		String recessive = "\n"
+				+ "<config>\n"
+				+ "    <service name='a'><one/></service>\n"
+				+ "    <service name='b'><one/></service>\n"
+				+ "    <service name='c'><one/></service>\n"
+				+ "    <service name='c' combine.id='1'><abc/></service>\n"
+				+ "    <service name='d'><one/></service>\n"
+				+ "    <service name='e'><one/></service>\n"
+				+ "</config>";
+		String dominant = "\n"
+				+ "<config>\n"
+				+ "    <service name='b'><two/></service>\n"
+				+ "    <service name='a'><two/></service>\n"
+				+ "    <service name='c'><two/></service>\n"
+				+ "    <service name='d' combine.id='1'><xyz/></service>\n"
+				+ "    <service name='d'><two/></service>\n"
+				+ "    <service name='f'><two/></service>\n"
+				+ "</config>";
+		String result = "\n"
+				+ "<config>\n"
+				+ "    <service name='a'><one/></service>\n"
+				+ "    <service name='b'><one/></service>\n"
+				+ "    <service name='c'><one/></service>\n"
+				+ "    <service name='d'><abc/><xyz/></service>\n"
+				+ "    <service name='d'><one/></service>\n"
+				+ "    <service name='e'><one/></service>\n"
+				+ "    <service name='b'><two/></service>\n"
+				+ "    <service name='a'><two/></service>\n"
+				+ "    <service name='c'><two/></service>\n"
+				+ "    <service name='d'><two/></service>\n"
+				+ "    <service name='f'><two/></service>\n"
+				+ "</config>";
+
+		ChildContextsMapper mapper = new GeneratorBasedChildContextsMapper(
+				new KeyAttributesKeysGenerator(ImmutableList.<String>of()));
+		final String actual = combineWithMapper(mapper, recessive, dominant);
 		//System.out.println(actual);
 		assertXMLIdentical(new Diff(result, actual), true);
 	}
