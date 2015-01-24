@@ -763,6 +763,39 @@ public class XmlCombinerTest {
 		assertXMLIdentical(new Diff(result, actual), true);
 	}
 
+	@Test
+	public void shouldCombineInOrder() throws IOException, SAXException, ParserConfigurationException,
+			TransformerException {
+		String recessive = "\n"
+				+ "<config>\n"
+				+ "    <service><a1/></service>\n"
+				+ "    <service><b1/></service>\n"
+				+ "    <service id='1'><c1/></service>\n"
+				+ "    <service id='2'><d1/></service>\n"
+				+ "</config>";
+		String dominant = "\n"
+				+ "<config>\n"
+				+ "    <service><a2/></service>\n"
+				+ "    <service><b2/></service>\n"
+				+ "    <service id='2'><d2/></service>\n"
+				+ "    <service id='1'><c2/></service>\n"
+				+ "</config>";
+		String result = "\n"
+				+ "<config>\n"
+				+ "    <service><a1/><a2/></service>\n"
+				+ "    <service><b1/><b2/></service>\n"
+				+ "    <service id='1'><c1/></service>\n"
+				+ "    <service id='2'><d1/></service>\n"
+				+ "    <service id='2'><d2/></service>\n"
+				+ "    <service id='1'><c2/></service>\n"
+				+ "</config>";
+
+		ChildContextsMapper mapper = new OrderChildContextsMapper();
+		String actual = combineWithMapper(mapper, recessive, dominant);
+		//System.out.println(actual);
+		assertXMLIdentical(new Diff(result, actual), true);
+	}
+
 
 	@Test
 	public void shouldSupportReadingAndStoringFiles() throws IOException, ParserConfigurationException, SAXException,
