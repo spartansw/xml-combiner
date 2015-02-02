@@ -7,11 +7,11 @@
 		<version>1.13</version>
 	</parent>
 	<artifactId>xml-combiner</artifactId>
-	<version>2.3-SPARTAN</version>
+	<version>2.4-SPARTAN-SNAPSHOT</version>
 	<name>Atteo XML combiner</name>
 	<scm>
 		<connection>scm:git:https://github.com/spartansw/xml-combiner.git</connection>
-		<tag>xml-combiner-2.3-SPARTAN</tag>
+		<tag>HEAD</tag>
 		<url>https://github.com/spartansw/xml-combiner</url>
 	</scm>
 	<dependencies>
