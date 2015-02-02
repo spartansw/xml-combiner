@@ -9,6 +9,10 @@
 	<artifactId>xml-combiner</artifactId>
 	<version>2.3-SPARTAN-SNAPSHOT</version>
 	<name>Atteo XML combiner</name>
+	<scm>
+		<connection>scm:git:https://github.com/spartansw/xml-combiner.git</connection>
+		<url>https://github.com/spartansw/xml-combiner</url>
+	</scm>
 	<dependencies>
 		<dependency>
 			<groupId>com.google.guava</groupId>
