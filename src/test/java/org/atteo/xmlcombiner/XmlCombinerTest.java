@@ -917,6 +917,41 @@ public class XmlCombinerTest {
 		assertXMLIdentical(new Diff(result, actual), true);
 	}
 
+	@Test
+	public void shouldCombineSingleSegmentXliff() throws IOException, SAXException, ParserConfigurationException,
+			TransformerException {
+		String recessive = "\n"
+				+ "<xliff>\n"
+				+ "    <header>foo</header>\n"
+				+ "    <header>bar</header>\n"
+				+ "    <file id='1'>\n"
+				+ "         <trans-unit>1</trans-unit>\n"
+				+ "    </file>\n"
+				+ "</xliff>";
+		String dominant = "\n"
+				+ "<xliff>\n"
+				+ "    <header>foo</header>\n"
+				+ "    <header>bar</header>\n"
+				+ "    <file id='1'>\n"
+				+ "         <trans-unit>2</trans-unit>\n"
+				+ "    </file>\n"
+				+ "</xliff>";
+		String result = "\n"
+				+ "<xliff>\n"
+				+ "    <header>foo</header>\n"
+				+ "    <header>bar</header>\n"
+				+ "    <file id='1'>\n"
+				+ "         <trans-unit>1</trans-unit>\n"
+				+ "         <trans-unit>2</trans-unit>\n"
+				+ "    </file>\n"
+				+ "</xliff>";
+
+		ChildContextsMapper mapper = new XliffChildContextsMapper();
+		String actual = combineWithMapper(mapper, recessive, dominant);
+		//System.out.println(actual);
+		assertXMLIdentical(new Diff(result, actual), true);
+	}
+
 
 	@Test
 	public void shouldSupportReadingAndStoringFiles() throws IOException, ParserConfigurationException, SAXException,

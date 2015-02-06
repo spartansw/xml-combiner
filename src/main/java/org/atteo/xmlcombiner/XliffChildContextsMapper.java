@@ -13,7 +13,7 @@ import com.google.common.collect.ListMultimap;
 public class XliffChildContextsMapper extends ChildContextsMapperSupport {
 
 	private final Function<Element, Map<String, String>> allAttributes = new AllAttributesKeysGenerator();
-	private final Function<Element, Map<String, String>> nameOnly = new KeyAttributesKeysGenerator(ImmutableList.<String>of());
+	private final Function<Element, Map<String, String>> uniqueKey = new UniqueKeyGenerator();
 
 	@Override
     public ListMultimap<Key, Context> mapChildContexts(Context parent,
@@ -22,7 +22,7 @@ public class XliffChildContextsMapper extends ChildContextsMapperSupport {
 		CompositeGenerator compositeGenerator = new CompositeGenerator(
 				ImmutableList.of(allAttributes, new ElementOrderKeysGenerator()));
 		XliffGenerator xliffGenerator = new XliffGenerator(
-				compositeGenerator, nameOnly);
+				compositeGenerator, uniqueKey);
 		return mapChildContextsWithGenerators(parent, xliffGenerator);
     }
 
